@@ -61,15 +61,11 @@ DESC
     super
   end
 
-  FORMATTED_RESULT_FOR_INVALID_RECORD = ''.freeze
-
   def format(tag, time, record)
-    # TODO: Use tag based chunk separation for more reliability
-    if record.empty? || record.has_value?(nil)
-      FORMATTED_RESULT_FOR_INVALID_RECORD
-    else
-      [tag, time, record].to_msgpack
-    end
+    # Don't allow any nil values (influxdb tag values & values must not be nil)
+    record.delete_if{|k,v| v.to_s.strip != '' }
+    
+    [tag, time, record].to_msgpack
   end
 
   def shutdown
@@ -88,14 +84,9 @@ DESC
         tags = {}
         record.each_pair do |k, v|
           if @tag_keys.include?(k)
-            # If the tag value is not nil, empty, or a space, add the tag
-            if v.to_s.strip != ''
-              tags[k] = v
-            end
+            tags[k] = v
           else
-            if v.to_s.strip != ''
-              values[k] = v
-            end
+            values[k] = v
           end
         end
       end
