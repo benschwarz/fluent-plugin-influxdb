@@ -62,9 +62,6 @@ DESC
   end
 
   def format(tag, time, record)
-    # Don't allow any nil values (influxdb tag values & values must not be nil)
-    record.delete_if{|k,v| v.to_s.strip != '' }
-    
     [tag, time, record].to_msgpack
   end
 
@@ -76,6 +73,10 @@ DESC
     points = []
     chunk.msgpack_each do |tag, time, record|
       timestamp = record.delete('time') || time
+      
+      # Don't allow any nil values (influxdb tag values & values must not be nil)
+      record.delete_if{|k,v| v.to_s.strip != '' }
+      
       if tag_keys.empty?
         values = record
         tags = {}
