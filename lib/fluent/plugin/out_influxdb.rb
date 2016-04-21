@@ -93,7 +93,9 @@ DESC
               tags[k] = v
             end
           else
-            values[k] = v
+            if v.to_s.strip != ''
+              values[k] = v
+            end
           end
         end
       end
